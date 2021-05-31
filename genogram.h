@@ -13,20 +13,20 @@ namespace gen{
 
   // Extra useful methods
   node* createEmptyGen();
-  bool isEmpty();
+  bool isEmpty(const Genogram&);
   // Methods requested by assignment
-  void addPerson();
-  void addRelMother();
-  void addRelFather();
-  void addRelCouple();
-  void addRelChildToCouple();
-  void setBirthDate();
-  void setDeathDate();
-  void deletePerson();
-  void isValid();
+  void addPerson(std::string, std::string, std::string, std::string, Genogram&);
+  void addRelMother(std::string, std::string, Genogram&);
+  void addRelFather(std::string, std::string, Genogram&);
+  void addRelCouple(std::string, std::string, Genogram&);
+  void addRelChildToCouple(std::string, std::string, Genogram&);
+  void setBirthDate(std::string, std::string, Genogram&);
+  void setDeathDate(std::string, std::string, Genogram&);
+  void deletePerson(std::string, Genogram&);
+  void isValid(Genogram&);
 
 } // namespace gen
 
 // Print and Read Methods
-void readGenogramFromFile();
-void printGenogram();
+void readGenogramFromFile(std::string, gen::Genogram&);
+void printGenogram(const gen::Genogram&);

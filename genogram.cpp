@@ -17,3 +17,12 @@ struct gen::edge{
   node* name;
   edge* next;
 };
+
+// Functions Implementation
+node* gen::createEmptyGen(){
+  return emptyGen;
+}
+
+bool gen::isEmpty(const Genogram& g){
+  return (g==emptyGen);
+}
