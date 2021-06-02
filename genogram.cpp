@@ -101,6 +101,37 @@ void addRel(std::string parentName, std::string sonName, bool areCouple, Genogra
   addInFront(son,parent,CHILD);
   addInFront(parent,son,PARENT);
 }
+
+void setDate(std::string name, std::string date, bool isBirth, Genogram& g){
+  Genogram aux=g;
+  while (aux){
+    if(aux->name==name){
+      if(isBirth){
+        aux->birth=date;
+      }else{
+        aux->death=date;
+      }
+      return;
+    }
+    aux=aux->next;
+  }
+  throw "Persona non presente nel genogramma!";
+}
+
+void deleteRelation(node* nameToDelete, edge* person){
+  edge* aux=person->name->edges;
+  edge* prev=nullptr;
+  while(aux->name!=nameToDelete){
+    prev=aux;
+    aux=aux->next;
+  }
+  if(!prev){
+    person->name->edges=aux->next;
+  }else{
+    prev->next=aux->next;
+  }
+  delete(aux);
+}
 // END AUXILIARY SECTION
 
 
@@ -163,6 +194,38 @@ void gen::addRelCouple(std::string name1, std::string name2, Genogram& g){
 void gen::addRelChildToCouple(std::string parentName, std::string sonName, Genogram& g){
   addRel(parentName, sonName, true, g);
 }
+
+// Set Birth of a person
+void gen::setBirthDate(std::string name, std::string birth, Genogram& g){
+  setDate(name, birth, true, g);
+}
+
+// Set Death of a person
+void gen::setDeathDate(std::string name, std::string death, Genogram& g){
+  setDate(name, death, false, g);
+}
+
+// Delete person from genogram
+void gen::deletePerson(std::string name, Genogram& g){
+  Genogram aux=g;
+  node* prev=nullptr;
+  while(aux->name!=name){
+    prev=aux;
+    aux=aux->next;
+  }
+  if(!aux)throw "Persona non presente nel genogramma!";
+  edge* tmp=aux->edges;
+  while(tmp){
+    deleteRelation(aux,tmp);
+    tmp=tmp->next;
+  }
+  if(!prev){
+    g=aux->next;
+  }else{
+    prev->next=aux->next;
+  }
+  delete(aux);
+}
 // END IMPLEMENTATION SECTION
 
 
@@ -174,7 +237,8 @@ void printGenogram(const gen::Genogram& g){
   node* father=nullptr;
   while(aux){
     std::cout << "_____________________________" << std::endl;
-    std::cout << aux->name << " " << aux->gender << std::endl;
+    std::cout << aux->name << " " << aux->gender << " ";
+    std::cout << "nato/a: " << aux->birth << " morto/a: " << aux->death << std::endl;
 
     edge* parent=aux->edges;
     while(parent){

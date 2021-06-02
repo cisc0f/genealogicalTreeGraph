@@ -22,9 +22,9 @@ namespace gen{
   void addRelFather(std::string, std::string, Genogram&); //X
   void addRelCouple(std::string, std::string, Genogram&); //X
   void addRelChildToCouple(std::string, std::string, Genogram&); //X
-  void setBirthDate(std::string, std::string, Genogram&);
-  void setDeathDate(std::string, std::string, Genogram&);
-  void deletePerson(std::string, Genogram&);
+  void setBirthDate(std::string, std::string, Genogram&); //X
+  void setDeathDate(std::string, std::string, Genogram&); //X
+  void deletePerson(std::string, Genogram&); //X
   void isValid(Genogram&);
 
 } // namespace gen

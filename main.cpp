@@ -103,10 +103,28 @@ int main(){
           gen::addRelChildToCouple(name1,name2,g);
           break;
         case 7:
+          system(clearTerminalCmd);
+          std::cout << "Nome persona: ";
+          std::cin >> name1;
+          std::cout << "Data di nascita: ";
+          std::cin >> date1;
+          gen::setBirthDate(name1,date1,g);
           break;
         case 8:
+          system(clearTerminalCmd);
+          std::cout << "Nome persona: ";
+          std::cin >> name1;
+          std::cout << "Data di morte: ";
+          std::cin >> date1;
+          gen::setDeathDate(name1,date1,g);
           break;
         case 9:
+          system(clearTerminalCmd);
+          std::cout << "Nome persona da eliminare: ";
+          std::cin >> name1;
+          gen::deletePerson(name1,g);
+          break;
+        case 10:
           break;
         case 11:
           system(clearTerminalCmd);
