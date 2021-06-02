@@ -25,7 +25,7 @@ int main(){
   int mainBackgroundColor{42}, secondaryBackgroundColor{41}, accentBackgroundColor{46};
 
   int choice{0};
-  std::string name1{""},gender{""},date1{""},date2{""};
+  std::string name1{""},name2{""},gender{""},date1{""},date2{""};
   gen::Genogram g= gen::createEmptyGen();
 
   do{
@@ -71,12 +71,36 @@ int main(){
           gen::addPerson(name1,gender,date1,date2,g);
           break;
         case 3:
+          system(clearTerminalCmd);
+          std::cout << "Nome della madre: ";
+          std::cin >> name1;
+          std::cout << "Nome del figlio/a: ";
+          std::cin >> name2;
+          gen::addRelMother(name1,name2,g);
           break;
         case 4:
+          system(clearTerminalCmd);
+          std::cout << "Nome del padre: ";
+          std::cin >> name1;
+          std::cout << "Nome del figlio/a: ";
+          std::cin >> name2;
+          gen::addRelFather(name1,name2,g);
           break;
         case 5:
+          system(clearTerminalCmd);
+          std::cout << "Nome prima persona: ";
+          std::cin >> name1;
+          std::cout << "Nome seconda persona: ";
+          std::cin >> name2;
+          gen::addRelCouple(name1,name2,g);
           break;
         case 6:
+          system(clearTerminalCmd);
+          std::cout << "Nome di uno dei genitori: ";
+          std::cin >> name1;
+          std::cout << "Nome del figlio/a: ";
+          std::cin >> name2;
+          gen::addRelChildToCouple(name1,name2,g);
           break;
         case 7:
           break;
