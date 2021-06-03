@@ -56,6 +56,10 @@ int main(){
         case 0:
           exit(0);
         case 1:
+          system(clearTerminalCmd);
+          std::cout << "Nome file: ";
+          std::cin >> name1;
+          readGenogramFromFile(name1,g);
           break;
         case 2:
           system(clearTerminalCmd);
@@ -125,6 +129,12 @@ int main(){
           gen::deletePerson(name1,g);
           break;
         case 10:
+          system(clearTerminalCmd);
+          if(gen::isValid(g)){
+            prettyPrint(accentBackgroundColor, " GENOGRAMMA VALIDO \n");
+          }else{
+            prettyPrintError(" GENOGRAMMA NON VALIDO \n");
+          }
           break;
         case 11:
           system(clearTerminalCmd);

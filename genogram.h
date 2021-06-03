@@ -1,4 +1,6 @@
 #include <string>
+#include <fstream>
+#include <sstream>
 #include <iostream>
 
 namespace gen{
@@ -17,15 +19,15 @@ namespace gen{
   node* createEmptyGen();
   bool isEmpty(const Genogram&);
   // Methods requested by assignment
-  void addPerson(std::string, std::string, std::string, std::string, Genogram&); //X
-  void addRelMother(std::string, std::string, Genogram&); //X
-  void addRelFather(std::string, std::string, Genogram&); //X
-  void addRelCouple(std::string, std::string, Genogram&); //X
-  void addRelChildToCouple(std::string, std::string, Genogram&); //X
-  void setBirthDate(std::string, std::string, Genogram&); //X
-  void setDeathDate(std::string, std::string, Genogram&); //X
-  void deletePerson(std::string, Genogram&); //X
-  void isValid(Genogram&);
+  void addPerson(std::string, std::string, std::string, std::string, Genogram&);
+  void addRelMother(std::string, std::string, Genogram&); 
+  void addRelFather(std::string, std::string, Genogram&); 
+  void addRelCouple(std::string, std::string, Genogram&); 
+  void addRelChildToCouple(std::string, std::string, Genogram&);
+  void setBirthDate(std::string, std::string, Genogram&); 
+  void setDeathDate(std::string, std::string, Genogram&); 
+  void deletePerson(std::string, Genogram&); 
+  bool isValid(Genogram&);
 
 } // namespace gen
 

@@ -8,6 +8,7 @@ struct gen::node{
   std::string gender;
   std::string birth;
   std::string death;
+  bool visited;
   // Structure
   edge* edges;
   node* next;
@@ -132,6 +133,18 @@ void deleteRelation(node* nameToDelete, edge* person){
   }
   delete(aux);
 }
+
+void startVisit(Genogram& g){
+  g->visited=true;
+  edge* tmp=g->edges;
+  while(tmp){
+    g=tmp->name;
+    if(!g->visited){
+      startVisit(g);
+    }
+    tmp=tmp->next;
+  }
+}
 // END AUXILIARY SECTION
 
 
@@ -154,6 +167,7 @@ void gen::addPerson(std::string name, std::string gender, std::string birth, std
   aux->gender = gender;
   aux->birth = birth;
   aux->death = death;
+  aux->visited = false;
   aux->edges = nullptr;
   aux->next = g;
   g=aux;
@@ -226,10 +240,51 @@ void gen::deletePerson(std::string name, Genogram& g){
   }
   delete(aux);
 }
+
+// Check if Genogram is Valid
+bool gen::isValid(Genogram& g){
+  Genogram aux=g;
+  startVisit(aux);
+  Genogram tmp=g;
+  while(tmp){
+    if(!tmp->visited)return false;
+    tmp->visited=false;
+    tmp=tmp->next;
+  }
+  return true;
+}
 // END IMPLEMENTATION SECTION
 
 
 // PRINT AND READ FUNCTIONS
+// Read genogram from file
+void readGenogramFromFile(std::string fileName, gen::Genogram& g){
+  std::fstream inputFile;
+  inputFile.open(fileName, std::ios::in);
+  std::string fileLine;
+  std::string arr[5];
+  std::string check;
+  while(getline(inputFile,fileLine)){
+    std::istringstream ss(fileLine);
+    int i=0;
+    while(ss >> check){
+      arr[i]=check;
+      i++;
+    }
+    if(arr[0]=="P"){
+      gen::addPerson(arr[1],arr[2],arr[3],arr[4],g);
+    }else if(arr[0]=="R"){
+      if(arr[2]=="M"){
+        gen::addRelMother(arr[1],arr[3],g);
+      }else if(arr[2]=="F"){
+        gen::addRelFather(arr[1],arr[3],g);
+      }else{
+        gen::addRelCouple(arr[1],arr[3],g);
+      }
+    }
+  }
+}
+
 // Print elements in graph
 void printGenogram(const gen::Genogram& g){
   Genogram aux=g;
