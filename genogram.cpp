@@ -6,8 +6,8 @@ struct gen::node{
   // Payload
   std::string name;
   std::string gender;
-  std::string birth;
-  std::string death;
+  time_t birth;
+  time_t death;
   bool visited;
   // Structure
   edge* edges;
@@ -58,14 +58,56 @@ bool checkBothParentsExists(node* son){
   return (count>1);
 }
 
+// Create a string from a timestamp
+std::string getStringFromTimestamp(time_t date){
+  tm* partialTime={0};
+  char stringDate[11]="";
+  partialTime = localtime(&date);
+  strftime(stringDate,sizeof(stringDate),"%d/%m/%Y",partialTime);
+  std::string resultString(stringDate);
+  return resultString;
+}
+
+// Create a timestamp from date string
+time_t getTimestampFromString(std::string date){
+  tm partialTime={0};
+  strptime(date.c_str(),"%d/%m/%Y",&partialTime);
+  time_t result = mktime(&partialTime);
+  return result;
+}
+
 // Add in front of the edges list of a node
 void addInFront(node* label, node* dstNode, relKind kind){
   edge* aux=new edge;
   aux->name=label;
   aux->kind=kind;
-  aux->next=dstNode->edges;
-  dstNode->edges=aux;
-  return;
+  aux->next=nullptr;
+
+  if(aux->kind!=CHILD||!dstNode->edges){
+    aux->next=dstNode->edges;
+    dstNode->edges=aux;
+    return;
+  }
+
+  edge* tmp=dstNode->edges;
+  edge* prev=tmp;
+  while(tmp){
+    if(tmp->kind==CHILD){
+      if(tmp->name->birth>aux->name->birth){
+        if(prev==tmp){
+          prev=aux;
+        }else{
+          prev->next=aux;
+        }
+        aux->next=tmp;
+        return;
+      }
+
+    }
+    prev=tmp;
+    tmp=tmp->next;
+  }
+  prev->next=aux;
 }
 
 // Add a relation (aux function used for addRelMother, addRelFather, addRelChildToCouple)
@@ -105,12 +147,13 @@ void addRel(std::string parentName, std::string sonName, bool areCouple, Genogra
 
 void setDate(std::string name, std::string date, bool isBirth, Genogram& g){
   Genogram aux=g;
+  time_t actualDate=getTimestampFromString(date);
   while (aux){
     if(aux->name==name){
       if(isBirth){
-        aux->birth=date;
+        aux->birth=actualDate;
       }else{
-        aux->death=date;
+        aux->death=actualDate;
       }
       return;
     }
@@ -162,11 +205,13 @@ bool gen::isEmpty(const Genogram& g){
 // Add person to node list
 void gen::addPerson(std::string name, std::string gender, std::string birth, std::string death, Genogram& g){
   if(findNode(name,g))throw "La persona inserita esiste!";
+  time_t actualBirthDate=getTimestampFromString(birth);
+  time_t actualDeathDate=getTimestampFromString(death);
   node* aux = new node;
   aux->name = name;
   aux->gender = gender;
-  aux->birth = birth;
-  aux->death = death;
+  aux->birth = actualBirthDate;
+  aux->death = actualDeathDate;
   aux->visited = false;
   aux->edges = nullptr;
   aux->next = g;
@@ -292,8 +337,17 @@ void printGenogram(const gen::Genogram& g){
   node* father=nullptr;
   while(aux){
     std::cout << "_____________________________" << std::endl;
+
     std::cout << aux->name << " " << aux->gender << " ";
-    std::cout << "nato/a: " << aux->birth << " morto/a: " << aux->death << std::endl;
+    std::cout << "nato/a: ";
+    if(aux->birth != -1){
+      std::cout << getStringFromTimestamp(aux->birth);
+    }
+    std::cout << " morto/a: ";
+    if(aux->death != -1){
+      std::cout << getStringFromTimestamp(aux->death);
+    }
+    std::cout << std::endl;
 
     edge* parent=aux->edges;
     while(parent){
