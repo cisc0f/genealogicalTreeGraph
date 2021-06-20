@@ -34,6 +34,15 @@ node* findNode(std::string name, Genogram& g){
   return emptyGen;
 }
 
+// Find if an edge already exists
+bool findEdgeNode(edge* edgeNode, edge* edgeToCheck){
+  while(edgeToCheck){
+    if(edgeNode->name==edgeToCheck->name)return true;
+    edgeToCheck=edgeToCheck->next;
+  }
+  return false;
+}
+
 // Check if the type of relation exists in the edges list (useful for partner existence check)
 bool checkRelKindExists(node* nodeToCheck, relKind kind){
   edge* edgeNode=nodeToCheck->edges;
@@ -69,7 +78,6 @@ std::string getStringFromTimestamp(time_t date){
   std::string resultDateAsString(buffer);
   return resultDateAsString;
 }
-
 // Create a timestamp from a string
 time_t getTimestampFromString(std::string date){
   tm parsedTime={0};
@@ -78,12 +86,13 @@ time_t getTimestampFromString(std::string date){
   return resultDateAsTimestamp;
 }
 
-// Add in front of the edges list of a node
+// Add edgeNode to a node based on kind and birth date (unique)
 void addOrderedByKindAndBirth(node* label, node* dstNode, relKind kind){
   edge* newEdgeNode=new edge;
   newEdgeNode->name=label;
   newEdgeNode->kind=kind;
   newEdgeNode->next=nullptr;
+  if(findEdgeNode(newEdgeNode, dstNode->edges))throw "Figlio/a già esistente! (Metodo errato per aggiunta figlio a coppia)";
 
   if(newEdgeNode->kind!=CHILD||!dstNode->edges){
     newEdgeNode->next=dstNode->edges;
@@ -137,6 +146,7 @@ void addRel(std::string parentName, std::string sonName, bool areCouple, Genogra
   }
   if(!son||!parent)throw "Una o entrambe queste persone non sono nel Genogramma!";
   if(checkParentAlreadySetted(son, parent->gender))throw "La modifica dei genitori non è possibile!";
+  if(son->birth<parent->birth)throw "Non è possibile inserire un figlio nato prima di un genitore!";
   if(!partner&&areCouple)throw "Questa persona non ha un partner associato!";
   if(areCouple){
     addOrderedByKindAndBirth(son,partner,CHILD);
@@ -184,13 +194,53 @@ void deleteNode(node* nodeToDelete, Genogram& g){
     }
     aux=nextNode;
   }
-  nodeToDelete->next->prev=nodeToDelete->prev;
+  if(nodeToDelete->next){
+    nodeToDelete->next->prev=nodeToDelete->prev;
+  }
   if(nodeToDelete->prev){
     nodeToDelete->prev->next=nodeToDelete->next;
   }else{
     g=nodeToDelete->next;
   }
   delete(nodeToDelete);
+}
+
+bool areParentsBiological(Genogram& g){
+  Genogram aux=g;
+  node* mother=nullptr;
+  node* father=nullptr;
+  int count=0;
+  while(aux){
+    edge* edgeNode=aux->edges;
+    while(edgeNode){
+      if(edgeNode->kind==PARENT){
+        count++;
+        if(edgeNode->name->gender=="M"){
+          father=edgeNode->name;
+        }else if(edgeNode->name->gender=="F"){
+          mother=edgeNode->name;
+        }
+      }
+      edgeNode=edgeNode->next;
+    }
+    if(count==2&&(!mother||!father))return false;
+    count=0;
+    aux=aux->next;
+  }
+  return true;
+}
+
+bool descendantsBirthIsCorrect(Genogram& g){
+  Genogram aux=g;
+  while(aux){
+    edge* edgeNode=aux->edges;
+    while(edgeNode){
+      if(edgeNode->kind==CHILD&&edgeNode->name->birth<aux->birth)return false;
+      edgeNode=edgeNode->next;
+    }
+    aux=aux->next;
+  }
+  return true;
 }
 
 void isConnected(Genogram& g){
@@ -221,11 +271,14 @@ bool gen::isEmpty(const Genogram& g){
 // Add person to node list
 void gen::addPerson(std::string name, std::string gender, std::string birth, std::string death, Genogram& g){
   if(findNode(name,g))throw "La persona inserita esiste!";
+  time_t birthDate = getTimestampFromString(birth);
+  time_t deathDate = getTimestampFromString(death);
+  if(deathDate!=-1&&deathDate<birthDate)throw "La data di morte inserita è anteriore alla data di nascita";
   node* aux = new node;
   aux->name = name;
   aux->gender = gender;
-  aux->birth = getTimestampFromString(birth);
-  aux->death = getTimestampFromString(death);
+  aux->birth = birthDate;
+  aux->death = deathDate;
   aux->visited = false;
   aux->edges = nullptr;
   aux->prev = nullptr;
@@ -241,12 +294,10 @@ void gen::addPerson(std::string name, std::string gender, std::string birth, std
 void gen::addRelMother(std::string motherName, std::string sonName, Genogram& g){
   addRel(motherName, sonName, false, g);
 }
-
 // Add father relation to a child and vice versa
 void gen::addRelFather(std::string fatherName, std::string sonName, Genogram& g){
   addRel(fatherName, sonName, false, g);
 }
-
 // Add child to a couple
 void gen::addRelChildToCouple(std::string parentName, std::string sonName, Genogram& g){
   addRel(parentName, sonName, true, g);
@@ -278,7 +329,6 @@ void gen::addRelCouple(std::string name1, std::string name2, Genogram& g){
 void gen::setBirthDate(std::string name, std::string birth, Genogram& g){
   setDate(name, birth, true, g);
 }
-
 // Set Death of a person
 void gen::setDeathDate(std::string name, std::string death, Genogram& g){
   setDate(name, death, false, g);
@@ -296,6 +346,8 @@ void gen::deletePerson(std::string name, Genogram& g){
 // Check if Genogram is Valid
 bool gen::isValid(Genogram& g){
   if(isEmpty(g))throw "Il genogramma è vuoto";
+  if(!areParentsBiological(g))throw "I genitori biologici non possono essere dello stesso sesso!";
+  if(!descendantsBirthIsCorrect(g))throw "Qualche discendente è nato prima di qualche suo antenato!";
   Genogram aux=g;
   isConnected(aux);
   Genogram tmp=g;
