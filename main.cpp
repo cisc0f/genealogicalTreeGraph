@@ -138,7 +138,7 @@ int main(){
           break;
         case 11:
           system(clearTerminalCmd);
-          prettyPrint(accentBackgroundColor, " RISULTATO \n");
+          prettyPrint(accentBackgroundColor, "\n RISULTATO \n");
           printGenogram(g);
           break;
         default:
